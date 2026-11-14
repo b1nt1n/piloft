@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>free-pi-cli Desktop</title>
+  <link rel="stylesheet" href="node_modules/@xterm/xterm/css/xterm.css">
+  <link rel="stylesheet" href="node_modules/@fontsource-variable/source-sans-3/index.css">
+  <link rel="stylesheet" href="node_modules/@fontsource-variable/manrope/index.css">
+  <link rel="stylesheet" href="node_modules/@fontsource/ibm-plex-mono/400.css">
+  <link rel="stylesheet" href="node_modules/@fontsource/ibm-plex-mono/600.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="changes.css">
+  <link rel="stylesheet" href="appearance.css">
+  <link rel="stylesheet" href="workbench.css">
+  <link rel="stylesheet" href="search.css">
+  <script defer src="node_modules/@xterm/xterm/lib/xterm.js"></script>
+  <script defer src="node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+  <script defer src="locale.js"></script>
+  <script defer src="screen.js"></script>
+  <script defer src="diff-lines.js"></script>
+  <script defer src="node_modules/@highlightjs/cdn-assets/highlight.min.js"></script>
+  <script defer src="workbench.js"></script>
+  <script defer src="chat-overview.js"></script>
+  <script defer src="changes.js"></script>
+  <script defer src="appearance.js"></script>
+  <script defer src="composer-attachments.js"></script>
+  <script defer src="composer-drafts.js"></script>
+  <script defer src="composer-completion.js"></script>
+  <script defer src="renderer.js"></script>
+  <script defer src="sidebar.js"></script>
+  <script defer src="view-find.js"></script>
+  <script defer src="node_modules/markdown-it/dist/browser/markdown-it.umd.min.js"></script>
+  <script defer src="chat-feed.js"></script>
+  <script defer src="onboarding.js"></script>
+  <script defer src="desktop-settings.js"></script>
+  <script defer src="desktop-tasks.js"></script>
+</head>
+<body>
+  <svg class="icons" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Lucide icons, see THIRD-PARTY-NOTICES.md. -->
+    <symbol id="i-panel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10Zm0 0v7h7"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19h8"/><path d="m4 17 6-6-6-6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-ellipsis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h.01M12 12h.01M19 12h.01"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></symbol>
+    <symbol id="i-rename" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></symbol>
+    <symbol id="i-diff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M9 10h6"/><path d="M12 13V7"/><path d="M9 17h6"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8h.01"/><path d="M12 12h.01"/><path d="M14 8h.01"/><path d="M16 12h.01"/><path d="M18 8h.01"/><path d="M6 8h.01"/><path d="M7 16h10"/><path d="M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M15 8V2"/><path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z"/><path d="M9 8V2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></symbol>
+    <symbol id="i-list-check" viewBox="0 0 24 24"><path d="m3 6 1.5 1.5L7 5m-4 8 1.5 1.5L7 12m4-6h10m-10 7h10m-10 6h10M4 19h1"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.9 19a9 9 0 1 1 14.2 0zM12 14l4-4"/></symbol>
+    <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m9 12 5.5-5.5a2.5 2.5 0 0 1 3.5 3.5l-7.5 7.5a4 4 0 0 1-5.7-5.7l8-8a5 5 0 0 1 7.1 7.1l-7.6 7.7"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 5V4H6a2 2 0 0 0-2 2v10h1"/></symbol>
+  </svg>
+  <aside class="sidebar" id="sidebar" aria-label="Projects and sessions">
+    <div class="brand"><img class="mark" src="assets/freepi-logo.svg" width="27" height="27" alt=""><strong>free-pi-cli</strong></div>
+    <button id="new-project" class="nav-button new-project" type="button" aria-haspopup="dialog" aria-controls="project-dialog" disabled><svg aria-hidden="true"><use href="#i-plus"/></svg>New project</button>
+    <button id="resume" class="nav-button history" title="Quick search (Ctrl+K)" aria-keyshortcuts="Control+k" aria-haspopup="dialog" aria-controls="sessions-dialog" disabled><svg><use href="#i-search"/></svg>Search <kbd>Ctrl K</kbd></button>
+    <nav class="project-section" aria-label="Project and chat navigation">
+      <section id="pinned-section" class="pinned-section" aria-labelledby="pinned-heading" hidden>
+        <div class="section-head"><h2 id="pinned-heading">Pinned</h2></div>
+        <div id="pinned-list"></div>
+      </section>
+      <div class="section-head">
+        <h2 id="projects-heading">Projects</h2>
+      </div>
+      <div id="projects-list"></div>
+      <p id="sidebar-pin-status" class="sidebar-pin-status" role="status" hidden></p>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="settings" class="nav-button" aria-expanded="false" aria-haspopup="dialog" aria-controls="settings-panel" title="Settings (Ctrl+,)" aria-keyshortcuts="Control+Comma"><svg><use href="#i-settings"/></svg>Settings</button>
+    </div>
+  </aside>
+  <main class="workspace" aria-label="free-pi workspace">
+    <header class="project-bar">
+      <button id="toggle-sidebar" class="icon" title="Collapse projects" aria-label="Collapse projects" aria-expanded="true" aria-controls="sidebar"><svg><use href="#i-panel"/></svg></button>
+      <svg class="crumb-icon" aria-hidden="true"><use href="#i-folder"/></svg>
+      <span id="folder-name">Project</span>
+      <span class="crumb-separator" aria-hidden="true">/</span>
+      <span id="project-title">New chat</span>
+      <div class="workspace-tools" role="group" aria-label="Workspace tools">
+        <button id="overview-toggle" class="icon" type="button" title="Chat overview" aria-label="Chat overview" aria-expanded="false" aria-controls="workbench"><svg aria-hidden="true"><use href="#i-list-check"/></svg></button>
+        <button id="changes-toggle" type="button" title="Changes" aria-label="Changes" aria-expanded="false" aria-controls="changes-panel"><svg aria-hidden="true"><use href="#i-diff"/></svg><span>Changes</span></button>
+        <button id="focus-terminal" class="icon terminal-button" title="Open terminal" aria-label="Open terminal" aria-expanded="false" aria-controls="terminal-pane"><svg aria-hidden="true"><use href="#i-terminal"/></svg></button>
+        <button id="workspace-menu-toggle" class="icon" type="button" title="Project actions" aria-label="Project actions" aria-expanded="false" aria-controls="workspace-menu" popovertarget="workspace-menu"><svg aria-hidden="true"><use href="#i-ellipsis"/></svg><span id="workspace-task-indicator" aria-hidden="true" hidden></span></button>
+        <div id="workspace-menu" popover aria-label="Project actions">
+          <div class="workspace-menu-group">
+            <button id="workbench-toggle" type="button" aria-expanded="false" aria-controls="workbench"><svg aria-hidden="true"><use href="#i-folder"/></svg><span>Project files</span></button>
+            <button id="project-actions" type="button" aria-haspopup="dialog" aria-controls="project-actions-dialog" disabled><svg aria-hidden="true"><use href="#i-play"/></svg><span>Project commands</span></button>
+            <button id="desktop-task-list" type="button" aria-haspopup="dialog" aria-controls="settings-panel"><svg aria-hidden="true"><use href="#i-list-check"/></svg><span>Tasks</span></button>
+          </div>
+          <div class="workspace-menu-group">
+            <button id="workspace-fork" type="button" disabled><svg aria-hidden="true"><use href="#i-branch"/></svg><span>Fork chat</span></button>
+            <button id="workspace-worktree" type="button" disabled><svg aria-hidden="true"><use href="#i-branch"/></svg><span>New chat in worktree</span></button>
+          </div>
+          <div class="workspace-menu-group">
+            <button id="workspace-preview" type="button" disabled><svg aria-hidden="true"><use href="#i-panel"/></svg><span>Open local preview</span></button>
+            <button id="workspace-capture-preview" type="button" hidden><svg aria-hidden="true"><use href="#i-paperclip"/></svg><span>Attach preview screenshot</span></button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="activity-area">
+      <div id="background-chat" class="background-chat" role="region" aria-label="Background work" hidden>
+        <div><strong id="background-title"></strong><span id="background-detail" role="status"></span></div>
+        <button id="return-running-chat" type="button">Go to running chat</button>
+        <button id="activate-viewed-chat" type="button" hidden>Continue this chat</button>
+      </div>
+      <section id="chat-feed" tabindex="0" aria-label="Conversation">
+        <div id="chat-empty" class="chat-empty">
+          <div class="chat-empty-mark"><img class="mark" src="assets/freepi-logo.svg" width="52" height="52" alt=""></div>
+          <h1>What are we working on?</h1>
+        </div>
+        <div id="chat-messages"></div>
+      </section>
+      <button id="chat-latest" class="chat-latest" type="button" hidden><svg aria-hidden="true"><use href="#i-up"/></svg>Go to the latest message</button>
+      <section id="terminal-pane" class="work-area" data-open="true" data-mode="full" aria-label="free-pi terminal">
+        <div id="startup-guide" hidden>
+          <div aria-live="polite">
+            <strong id="startup-guide-title"></strong>
+            <p id="startup-guide-detail"></p>
+          </div>
+          <button id="startup-retry" type="button" hidden>Try again</button>
+        </div>
+        <div id="terminal"></div>
+      </section>
+    </div>
+    <div id="freepi-ad" hidden></div>
+    <footer class="composer-wrap">
+      <div class="composer">
+        <div id="composer-queue" class="composer-queue" hidden><span id="composer-queue-label" role="status"></span><button id="composer-queue-cancel" type="button">Remove</button></div>
+        <div id="composer-attachments" class="composer-attachments" hidden></div>
+        <output id="attachment-status" class="attachment-status" aria-live="polite" hidden></output>
+        <output id="composer-draft-status" class="attachment-status" aria-live="polite" hidden></output>
+        <input id="attachment-files" type="file" multiple hidden>
+        <textarea id="prompt" rows="1" placeholder="What would you like to do?" aria-label="Message to free-pi" aria-autocomplete="list" aria-controls="completion-options" disabled></textarea>
+        <div class="composer-bar">
+          <button id="attach-files" class="icon" type="button" aria-label="Attach files" title="Attach files"><svg aria-hidden="true"><use href="#i-paperclip"/></svg></button>
+          <div class="model-group">
+            <button id="model" class="model-button" disabled aria-expanded="false" aria-controls="picker">
+              <span id="model-name">Model</span><span class="chevron" aria-hidden="true"></span>
+            </button>
+            <button id="thinking" disabled aria-label="Reasoning level" title="Reasoning level" aria-expanded="false" aria-controls="picker">
+              <span id="thinking-label">Reasoning</span><span class="chevron" aria-hidden="true"></span>
+            </button>
+            <span id="offer" class="offer" hidden>Free Unlimited: limited time</span>
+          </div>
+          <button id="context-meter" type="button" title="Chat context" aria-label="Chat context" aria-expanded="false" aria-controls="context-popover" popovertarget="context-popover" disabled><svg aria-hidden="true"><use href="#i-gauge"/></svg><span id="context-meter-value" aria-hidden="true" hidden></span></button>
+          <section id="context-popover" popover aria-label="Chat context">
+            <strong>Chat context</strong>
+            <output id="context-usage"></output>
+            <progress id="context-progress" aria-label="Context used"></progress>
+            <output id="context-action-status" aria-live="polite" hidden></output>
+            <button id="context-details" type="button">View context</button>
+            <button id="compact-chat" type="button" disabled>Compact context</button>
+          </section>
+          <button id="project-context" type="button" hidden><svg aria-hidden="true"><use href="#i-folder"/></svg><span></span></button>
+          <span id="status" role="status">Starting free-pi…</span>
+          <button id="show-confirmation" type="button" hidden>Go to confirmation</button>
+          <button id="restart" hidden>Start CLI</button>
+          <button id="send" class="send" disabled aria-label="Send" title="Send · Enter"><svg><use href="#i-up"/></svg></button>
+          <button id="stop" class="send stop" hidden aria-label="Stop reply" title="Stop · Escape"><span aria-hidden="true"></span></button>
+          <button id="queue-message" type="button" hidden>Queue</button>
+          <button id="queue-other-chat" type="button" hidden>Queue</button>
+        </div>
+        <section id="picker" class="panel picker" aria-labelledby="picker-title" hidden>
+          <div class="picker-head">
+            <h2 id="picker-title">Models</h2>
+            <button id="dismiss" class="icon" aria-label="Close picker"><svg><use href="#i-close"/></svg></button>
+          </div>
+          <label id="search-box"><span class="sr-only">Model search</span><input id="search" placeholder="Find a model" autocomplete="off" spellcheck="false"></label>
+          <div id="choices"></div>
+          <button id="picker-usage">Balance <span class="command">/usage</span></button>
+        </section>
+        <section id="composer-completion" class="panel composer-completion" aria-labelledby="completion-title" hidden>
+          <h2 id="completion-title">Suggestions</h2>
+          <div id="completion-options" role="listbox" aria-labelledby="completion-title"></div>
+          <p id="completion-status" role="status" hidden></p>
+        </section>
+      </div>
+    </footer>
+  </main>
+  <aside id="workbench" aria-label="Workbench" hidden>
+    <header class="workbench-header">
+      <div class="workbench-tabs" role="group" aria-label="Workbench section">
+        <button type="button" data-workbench-tab="overview" aria-controls="workbench-overview"><svg aria-hidden="true"><use href="#i-list-check"/></svg>Overview</button>
+        <button type="button" data-workbench-tab="changes" aria-controls="changes-panel"><svg aria-hidden="true"><use href="#i-diff"/></svg>Changes</button>
+        <button type="button" data-workbench-tab="files" aria-controls="workbench-files"><svg aria-hidden="true"><use href="#i-folder"/></svg>Files</button>
+        <button type="button" data-workbench-tab="attachments" aria-controls="workbench-attachments"><svg aria-hidden="true"><use href="#i-paperclip"/></svg>Attachments</button>
+      </div>
+      <button id="workbench-close" class="icon" type="button" aria-label="Close workbench"><svg aria-hidden="true"><use href="#i-close"/></svg></button>
+    </header>
+    <div id="workbench-divider" tabindex="0" role="separator" aria-orientation="vertical" aria-label="Workbench width"></div>
+    <aside id="changes-panel" aria-label="Changes" hidden></aside>
+    <section id="workbench-overview" aria-label="Chat overview" hidden></section>
+    <section id="workbench-files" aria-label="Project files" hidden>
+      <input id="workbench-search" type="search" aria-label="Find a file" placeholder="Find a project file">
+      <div id="workbench-files-list"></div>
+      <div id="workbench-file-toolbar" hidden>
+        <strong id="workbench-filename"></strong>
+        <button id="workbench-context" type="button">Add to context</button>
+        <button id="workbench-editor" type="button">Open in Notepad</button>
+      </div>
+      <div id="workbench-file-preview" tabindex="0" aria-label="File preview">
+        <p id="workbench-file-status" role="status">Choose a project file.</p>
+        <pre hidden><code id="workbench-file-content"></code></pre>
+      </div>
+    </section>
+    <section id="workbench-attachments" aria-label="Chat attachments" hidden></section>
+  </aside>
+  <dialog id="attachment-dialog" aria-labelledby="attachment-title">
+    <header class="attachment-dialog-header">
+      <h2 id="attachment-title"></h2>
+      <form method="dialog"><button class="icon" type="submit" aria-label="Close" autofocus><svg aria-hidden="true"><use href="#i-close"/></svg></button></form>
+    </header>
+    <p id="attachment-preview-status" role="status"></p>
+    <div id="attachment-preview-content"></div>
+    <footer class="attachment-dialog-footer">
+      <button id="attachment-reveal" type="button"><svg aria-hidden="true"><use href="#i-folder"/></svg>Show in File Explorer</button>
+    </footer>
+  </dialog>
+  <dialog id="context-details-dialog" aria-labelledby="context-details-title">
+    <header class="context-details-header">
+      <h2 id="context-details-title">Chat context</h2>
+      <form method="dialog"><button class="icon" type="submit" aria-label="Close"><svg aria-hidden="true"><use href="#i-close"/></svg></button></form>
+    </header>
+    <p id="context-details-status">Context reported by the CLI for this chat. Long entries are shortened.</p>
+    <div id="context-details-list"></div>
+  </dialog>
+  <dialog id="local-preview-dialog" aria-labelledby="local-preview-title">
+    <form id="local-preview-form">
+      <h2 id="local-preview-title">Open local preview</h2>
+      <label for="local-preview-url">Local server URL</label>
+      <input id="local-preview-url" type="url" placeholder="http://localhost:3000" required autofocus>
+      <p id="local-preview-status" role="status"></p>
+      <footer class="project-dialog-footer"><button id="local-preview-cancel" type="button">Cancel action</button><button type="submit">Open preview</button></footer>
+    </form>
+  </dialog>
+  <dialog id="new-worktree-dialog" aria-labelledby="new-worktree-title">
+    <form id="new-worktree-form">
+      <h2 id="new-worktree-title">New chat in worktree</h2>
+      <label for="worktree-base">Base branch or commit</label>
+      <input id="worktree-base" value="HEAD" maxlength="180" required autofocus>
+      <p class="worktree-note">Uses files from the selected commit. Your local changes stay in the original folder.</p>
+      <p id="new-worktree-status" role="status"></p>
+      <footer class="project-dialog-footer"><button id="new-worktree-cancel" type="button">Cancel action</button><button type="submit">Create worktree</button></footer>
+    </form>
+  </dialog>
+  <div id="project-menu" role="menu" aria-label="Project actions" hidden>
+    <button id="project-menu-rename" type="button" role="menuitem" tabindex="-1"><svg aria-hidden="true"><use href="#i-rename"/></svg>Rename</button>
+    <button id="project-menu-explorer" type="button" role="menuitem" tabindex="-1"><svg aria-hidden="true"><use href="#i-folder"/></svg>Open in File Explorer</button>
+    <button id="project-menu-hide" type="button" role="menuitem" tabindex="-1"><svg aria-hidden="true"><use href="#i-close"/></svg>Remove from list</button>
+    <button id="project-menu-settings" type="button" role="menuitem" tabindex="-1"><svg aria-hidden="true"><use href="#i-settings"/></svg>Project settings</button>
+    <button id="chat-menu-rename" type="button" role="menuitem" tabindex="-1" hidden><svg aria-hidden="true"><use href="#i-rename"/></svg>Rename</button>
+    <button id="chat-menu-pin" type="button" role="menuitem" tabindex="-1" hidden><svg aria-hidden="true"><use href="#i-pin"/></svg><span>Pin</span></button>
+    <button id="chat-menu-archive" type="button" role="menuitem" tabindex="-1" hidden><svg aria-hidden="true"><use href="#i-history"/></svg>Archive chat</button>
+  </div>
+  <dialog id="rename-project-dialog" aria-labelledby="rename-project-heading">
+    <form id="rename-project-form">
+      <header class="project-dialog-header"><h2 id="rename-project-heading">Rename project</h2></header>
+      <label class="project-name-field" for="rename-project-name">
+        <svg class="crumb-icon" aria-hidden="true"><use href="#i-folder"/></svg>
+        <span class="sr-only">Project name</span>
+        <input id="rename-project-name" name="name" type="text" placeholder="Project name" maxlength="120" autocomplete="off" required autofocus>
+      </label>
+      <p id="rename-project-status" role="status" hidden></p>
+      <footer class="project-dialog-footer">
+        <button id="rename-project-cancel" type="button">Cancel action</button>
+        <button id="rename-project-submit" type="submit">Save</button>
+      </footer>
+    </form>
+  </dialog>
+  <dialog id="project-dialog" aria-labelledby="project-dialog-heading">
+    <form id="project-form">
+      <header class="project-dialog-header">
+        <h2 id="project-dialog-heading">Create project</h2>
+        <button class="icon" type="button" aria-label="Close project creation" data-close-project-dialog><svg aria-hidden="true"><use href="#i-close"/></svg></button>
+      </header>
+      <p id="first-project-guide" hidden>Choose or create a folder to start. Then review the FreePi terms and sign in with GitHub.</p>
+      <label class="project-name-field" for="project-name">
+        <svg class="crumb-icon" aria-hidden="true"><use href="#i-folder"/></svg>
+        <span class="sr-only">Project name</span>
+        <input id="project-name" name="projectName" type="text" placeholder="Project name" maxlength="120" autocomplete="off" autofocus>
+      </label>
+      <section class="project-folder-section" aria-labelledby="project-folder-heading">
+        <h3 id="project-folder-heading">Source folder</h3>
+        <div class="project-folder-box">
+          <p id="project-folder-mode">On this computer</p>
+          <div class="project-folder-actions">
+            <button id="project-pick-folder" type="button"><svg aria-hidden="true"><use href="#i-folder"/></svg>Choose folder</button>
+            <button id="project-pick-parent" type="button"><svg aria-hidden="true"><use href="#i-plus"/></svg>Create folder</button>
+          </div>
+          <output id="project-location" aria-label="Project folder path" hidden></output>
+        </div>
+      </section>
+      <div>
+        <p id="project-dialog-status" role="status"></p>
+        <footer class="project-dialog-footer">
+          <button type="button" data-close-project-dialog>Cancel action</button>
+          <button id="project-submit" type="submit">Create project</button>
+        </footer>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="sessions-dialog" aria-labelledby="sessions-heading">
+    <div class="sessions-header">
+      <h2 id="sessions-heading">All sessions</h2>
+      <form method="dialog"><button class="icon" aria-label="Close sessions"><svg><use href="#i-close"/></svg></button></form>
+    </div>
+    <label for="sessions-search" class="sr-only">Search sessions</label>
+    <input id="sessions-search" placeholder="Search chats and messages" autocomplete="off" autofocus>
+    <div id="sessions-results" aria-label="Saved sessions"></div>
+    <p id="sessions-status" role="status" hidden></p>
+  </dialog>
+  <dialog id="settings-panel" aria-labelledby="settings-title">
+    <div class="settings-layout">
+      <nav class="settings-nav" aria-labelledby="settings-title">
+        <h2 id="settings-title">Settings</h2>
+        <label class="settings-search-field"><svg aria-hidden="true"><use href="#i-search"/></svg><input id="settings-search" type="search" placeholder="Search settings" aria-label="Search settings"></label>
+        <button type="button" data-settings-page="general" aria-controls="settings-general"><svg aria-hidden="true"><use href="#i-settings"/></svg>General</button>
+        <button type="button" data-settings-page="appearance" aria-controls="settings-appearance"><svg aria-hidden="true"><use href="#i-sliders"/></svg>Appearance</button>
+        <button type="button" data-settings-page="usage" aria-controls="settings-usage"><svg aria-hidden="true"><use href="#i-gauge"/></svg>Models and limits</button>
+        <button type="button" data-settings-page="agent" aria-controls="settings-agent"><svg aria-hidden="true"><use href="#i-terminal"/></svg>Agent</button>
+        <button type="button" data-settings-page="shortcuts" aria-controls="settings-shortcuts"><svg aria-hidden="true"><use href="#i-keyboard"/></svg>Keyboard shortcuts</button>
+        <button type="button" data-settings-page="notifications" aria-controls="settings-notifications"><svg aria-hidden="true"><use href="#i-bell"/></svg>Notifications</button>
+        <button type="button" data-settings-page="integrations" aria-controls="settings-integrations"><svg aria-hidden="true"><use href="#i-plug"/></svg>Integrations</button>
+        <button type="button" data-settings-page="project" aria-controls="settings-project"><svg aria-hidden="true"><use href="#i-folder"/></svg>Project</button>
+        <button type="button" data-settings-page="tasks" aria-controls="settings-tasks"><svg aria-hidden="true"><use href="#i-list-check"/></svg>Tasks</button>
+        <p id="settings-no-results" role="status" hidden>No settings found.</p>
+      </nav>
+      <div class="settings-main">
+        <form method="dialog" class="settings-close"><button class="icon" aria-label="Close settings"><svg aria-hidden="true"><use href="#i-close"/></svg></button></form>
+        <section class="settings-page" id="settings-general" hidden>
+          <header class="settings-page-header"><h3>General</h3></header>
+          <form id="desktop-preferences" class="settings-card">
+            <label class="settings-row"><span>Interface language</span><select id="interface-language"><option value="en">English</option><option value="ru" lang="ru">Русский</option></select></label>
+            <label class="settings-row"><span>File editor</span><select id="desktop-editor"><option value="notepad">Notepad</option><option value="default">System default</option></select></label>
+            <label class="settings-row"><span>Project command shell</span><select id="desktop-shell"><option value="powershell">Windows PowerShell</option><option value="cmd">Command Prompt</option></select></label>
+            <div class="settings-row"><span class="settings-row-copy"><strong>Startup folder</strong><small id="desktop-start-folder">Default folder</small></span><span><button type="button" id="desktop-pick-start">Choose</button><button type="button" id="desktop-reset-start">Reset</button></span></div>
+            <label class="settings-row"><span>Restore the last chat</span><input id="desktop-restore-chat" type="checkbox"></label>
+            <label class="settings-row"><span>Confirm before closing the window</span><input id="desktop-confirm-close" type="checkbox"></label>
+            <label class="settings-row"><span>Model for new chats</span><select id="desktop-model"></select></label>
+            <label class="settings-row" id="desktop-model-custom-row" hidden><span>Model ID</span><input id="desktop-model-custom" maxlength="130" spellcheck="false" autocomplete="off"></label>
+            <label class="settings-row"><span>Reasoning for new chats</span><select id="desktop-thinking"></select></label>
+            <label class="settings-row desktop-stacked"><span class="settings-row-copy"><strong>New chat instructions</strong><small>Added once when you send the first message in a new chat.</small></span><textarea id="desktop-initial-prompt" rows="4" maxlength="8000"></textarea></label>
+            <label class="settings-row"><span class="settings-row-copy"><strong>CLI version on next launch</strong><small>This does not change server models or limits.</small></span><select id="desktop-cli-channel"><option value="stable">Tested · 0.6.21</option><option value="latest">Latest · experimental</option></select></label>
+            <label class="settings-row"><span class="settings-row-copy"><strong>Experimental schedules</strong><small>Sends prompts automatically in new chats. Off by default.</small></span><input id="desktop-enable-schedules" type="checkbox"></label>
+          </form>
+          <footer class="settings-save-bar"><output id="desktop-settings-status" role="status"></output><button type="submit" form="desktop-preferences">Save changes</button></footer>
+        </section>
+        <section class="settings-page" id="settings-appearance">
+          <header class="settings-page-header">
+            <h3>Appearance</h3>
+          </header>
+          <h4>Theme</h4>
+          <fieldset class="settings-theme-options">
+            <legend class="sr-only">Color mode</legend>
+            <label class="settings-theme-option" data-theme-card="dark">
+              <input class="sr-only" type="radio" name="settings-theme" value="dark">
+              <span class="settings-theme-preview" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span><svg aria-hidden="true"><use href="#i-moon"/></svg>Graphite</span>
+            </label>
+            <label class="settings-theme-option" data-theme-card="light">
+              <input class="sr-only" type="radio" name="settings-theme" value="light">
+              <span class="settings-theme-preview" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span><svg aria-hidden="true"><use href="#i-sun"/></svg>Light</span>
+            </label>
+            <label class="settings-theme-option" data-theme-card="system">
+              <input class="sr-only" type="radio" name="settings-theme" value="system">
+              <span class="settings-theme-preview" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span><svg aria-hidden="true"><use href="#i-monitor"/></svg>Follow Windows</span>
+            </label>
+          </fieldset>
+          <div class="settings-card settings-theme-colors">
+            <label class="settings-row"><span>Custom colors</span><input id="theme-custom" type="checkbox"></label>
+            <div id="theme-colors" hidden>
+              <label class="settings-row"><span>Background</span><span class="settings-swatch"><input id="theme-background" type="color"><output for="theme-background"></output></span></label>
+              <label class="settings-row"><span>Text</span><span class="settings-swatch"><input id="theme-foreground" type="color"><output for="theme-foreground"></output></span></label>
+              <label class="settings-row"><span>Accent</span><span class="settings-swatch"><input id="theme-accent" type="color"><output for="theme-accent"></output></span></label>
+              <p id="theme-contrast" role="status" class="settings-color-note" hidden></p>
+            </div>
+          </div>
+          <h4>Interface and chat</h4>
+          <div class="settings-card">
+            <label class="settings-row"><span>Interface font</span><select id="ui-font"><option value="manrope">Manrope</option><option value="source">Source Sans 3</option><option value="system">System</option></select></label>
+            <label class="settings-row"><span>Interface size</span><select id="ui-size"><option value="small">Compact</option><option value="default" selected>Default</option><option value="large">Large</option></select></label>
+            <label class="settings-row"><span>Chat text size</span><select id="chat-size"><option value="small">Small</option><option value="default" selected>Default</option><option value="large">Large</option></select></label>
+            <label class="settings-row"><span>Chat width</span><select id="chat-width"><option value="narrow">Narrow</option><option value="default" selected>Default width</option><option value="wide">Wide</option></select></label>
+            <label class="settings-row"><span>Spacing</span><select id="chat-density"><option value="compact">Tight</option><option value="default" selected>Standard</option><option value="relaxed">Spacious</option></select></label>
+            <label class="settings-row"><span>Animations</span><select id="ui-motion"><option value="system">Follow Windows</option><option value="reduced">Reduced</option></select></label>
+          </div>
+          <h4>Code and terminal</h4>
+          <div class="settings-card">
+            <label class="settings-row"><span>Monospace font</span><select id="terminal-font"><option value="plex">IBM Plex Mono</option><option value="cascadia">Cascadia Mono</option><option value="consolas">Consolas</option></select></label>
+            <label class="settings-row"><span>Terminal text size</span><select id="terminal-size"><option value="13">13 px</option><option value="15" selected>15 px</option><option value="17">17 px</option><option value="19">19 px</option></select></label>
+          </div>
+          <button id="reset-appearance" type="button" class="settings-action settings-reset">Reset appearance</button>
+        </section>
+        <section class="settings-page" id="settings-usage" hidden>
+          <header class="settings-page-header">
+            <h3>Models and limits</h3>
+            <p>free-pi reports the current balance.</p>
+          </header>
+          <div class="settings-card">
+            <div class="settings-row"><span>Active model</span><output id="settings-model">—</output></div>
+            <div class="settings-row">
+              <span class="settings-row-copy"><strong>Balance</strong><output id="balance" aria-live="polite">No data yet.</output><span id="usage-status" role="status" hidden></span></span>
+              <button id="usage" type="button" class="settings-action" disabled>Refresh</button>
+            </div>
+            <div class="settings-row"><span>Last updated via /usage</span><output id="usage-updated">—</output></div>
+            <div class="settings-row"><span>Reset time</span><output id="usage-reset">—</output></div>
+          </div>
+        </section>
+        <section class="settings-page" id="settings-agent" hidden>
+          <header class="settings-page-header">
+            <h3>Agent</h3>
+          </header>
+          <div class="settings-card">
+            <div class="settings-row">
+              <span class="settings-row-copy"><strong>Tool output</strong><small>Controls how much tool output appears in the free-pi terminal.</small></span>
+              <div class="segments" aria-label="Tool output detail">
+                <button type="button" data-tools="compact" disabled>Brief</button>
+                <button type="button" data-tools="full" disabled>Full</button>
+                <button type="button" data-tools="hidden" disabled>Hide</button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="settings-page" id="settings-shortcuts" hidden>
+          <header class="settings-page-header"><h3>Keyboard shortcuts</h3></header>
+          <dl class="settings-card settings-shortcuts">
+            <div class="settings-row"><dt>Quick search</dt><dd><kbd>Ctrl</kbd><kbd>K</kbd></dd></div>
+            <div class="settings-row"><dt>Find in the open view</dt><dd><kbd>Ctrl</kbd><kbd>F</kbd></dd></div>
+            <div class="settings-row"><dt>Settings</dt><dd><kbd>Ctrl</kbd><kbd>,</kbd></dd></div>
+            <div class="settings-row"><dt>Send a message</dt><dd><kbd>Enter</kbd></dd></div>
+            <div class="settings-row"><dt>New line in a message</dt><dd><kbd>Shift</kbd><kbd>Enter</kbd></dd></div>
+            <div class="settings-row"><dt>Close a menu or dialog</dt><dd><kbd>Esc</kbd></dd></div>
+          </dl>
+        </section>
+        <section class="settings-page" id="settings-project" hidden>
+          <header class="settings-page-header"><h3>Project settings</h3><p id="profile-folder"></p></header>
+          <p id="profile-missing">Select a project in the sidebar or open its settings from the context menu.</p>
+          <p id="profile-preference-status" role="status" hidden></p>
+          <form id="profile-form" class="settings-card" hidden>
+            <div class="settings-row"><span>Git branch</span><output id="profile-branch">—</output></div>
+            <div class="settings-row"><span>Root instructions</span><output id="profile-instructions">—</output></div>
+            <div class="settings-row"><span class="settings-row-copy"><strong>Folder trust</strong><small id="profile-trust">Reported by the CLI</small></span><button type="button" id="profile-trust-open">Open /trust</button></div>
+            <label class="settings-row"><span>Model for new chats</span><select id="profile-model"></select></label>
+            <label class="settings-row" id="profile-model-custom-row" hidden><span>Model ID</span><input id="profile-model-custom" maxlength="130" spellcheck="false" autocomplete="off"></label>
+            <label class="settings-row"><span>Reasoning for new chats</span><select id="profile-thinking"></select></label>
+            <div class="settings-row"><strong>Project commands</strong><button type="button" id="profile-add-action">Add</button></div>
+            <div id="profile-actions"></div>
+          </form>
+          <footer class="settings-save-bar" id="profile-save-bar" hidden><output id="profile-status" role="status"></output><button type="submit" form="profile-form">Save changes</button></footer>
+        </section>
+        <section class="settings-page" id="settings-notifications" hidden>
+          <header class="settings-page-header"><h3>Windows notifications</h3><p>Shown when another chat is open or the window is inactive.</p></header>
+          <div class="settings-card">
+            <label class="settings-row"><span>Reply ready</span><input type="checkbox" data-notification-kind="done"></label>
+            <label class="settings-row"><span>Confirmation needed</span><input type="checkbox" data-notification-kind="confirmation"></label>
+            <label class="settings-row"><span>Error or interruption</span><input type="checkbox" data-notification-kind="failed"></label>
+            <div class="settings-row"><span class="settings-row-copy"><strong>Start menu shortcut</strong><small>Windows uses it to deliver notifications when launched from the batch file.</small></span><button id="desktop-enable-notifications" type="button">Create shortcut</button></div>
+          </div>
+          <output id="desktop-notification-status" role="status"></output>
+        </section>
+        <section class="settings-page" id="settings-integrations" hidden>
+          <header class="settings-page-header"><h3>Integrations and diagnostics</h3></header>
+          <div class="settings-card">
+            <div class="settings-row"><span>MCP connections</span><button id="integrations" type="button" disabled>Manage in CLI</button></div>
+            <div class="settings-row"><span>free-pi CLI version</span><output id="desktop-cli-version">—</output></div>
+            <div class="settings-row"><span>Desktop version</span><output id="desktop-app-version">—</output></div>
+            <div class="settings-row"><span>Client status</span><button id="desktop-copy-diagnostics" type="button">Copy diagnostics</button></div>
+          </div>
+          <h4>Skills in this session</h4>
+          <ul id="desktop-skills"></ul>
+          <h4>Project and personal prompts</h4>
+          <ul id="desktop-prompts"></ul>
+          <h4>MCP servers</h4>
+          <ul id="desktop-mcp-list"></ul>
+          <button id="integrations-refresh" type="button">Refresh</button>
+          <h4>Project commands</h4>
+          <ul id="integrations-command-list"></ul>
+          <button id="integrations-project-commands" type="button">Project settings</button>
+          <h4>Workflow templates</h4>
+          <div class="integration-templates">
+            <button type="button" data-workflow="docs">Look up documentation</button>
+            <button type="button" data-workflow="github">Review for GitHub</button>
+            <button type="button" data-workflow="checks">Check this project</button>
+          </div>
+          <output id="integration-workflow-status" role="status"></output>
+          <output id="desktop-diagnostics-status" role="status"></output>
+        </section>
+        <section class="settings-page" id="settings-tasks" hidden>
+          <header class="settings-page-header"><h3>Tasks</h3><p>The official CLI handles requests one at a time. The app must stay open to run schedules.</p></header>
+          <h4>Chat queue</h4>
+          <div id="desktop-queue-list" class="settings-card"></div>
+          <h4>Schedules</h4>
+          <p id="schedules-disabled" hidden>Automatic runs are off. You can enable them in General settings.</p>
+          <div id="desktop-schedule-list" class="settings-card"></div>
+          <details id="schedule-editor">
+            <summary><svg aria-hidden="true"><use href="#i-plus"/></svg>New schedule</summary>
+            <form id="desktop-schedule-form" class="settings-card">
+              <label class="settings-row"><span>Name</span><input id="schedule-name" maxlength="90" required></label>
+              <label class="settings-row"><span>Project</span><select id="schedule-folder" required></select></label>
+              <label class="settings-row"><span>First run in local time</span><input id="schedule-at" type="datetime-local" required></label>
+              <label class="settings-row"><span>Repeat</span><select id="schedule-repeat"><option value="once">Once</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+              <label class="settings-row desktop-stacked"><span>Prompt for a new chat</span><textarea id="schedule-prompt" rows="3" maxlength="32000" required></textarea></label>
+              <div class="settings-row"><button type="submit">Add schedule</button></div>
+            </form>
+          </details>
+          <p id="desktop-task-status" role="status"></p>
+          <h4>Run history</h4>
+          <div id="desktop-runs" class="settings-card"></div>
+        </section>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="onboarding-dialog" aria-labelledby="onboarding-title">
+    <form id="onboarding-form">
+      <img src="assets/freepi-logo.svg" width="42" height="42" alt="">
+      <section id="onboarding-language">
+        <h2 id="onboarding-title" tabindex="-1">Choose your language</h2>
+        <p>You can change it later in Settings.</p>
+        <fieldset>
+          <legend class="sr-only">Interface language</legend>
+          <label><input type="radio" name="welcome-language" value="en" checked>English</label>
+          <label lang="ru"><input type="radio" name="welcome-language" value="ru">Русский</label>
+        </fieldset>
+      </section>
+      <section id="onboarding-theme" hidden>
+        <h2 id="onboarding-theme-title" tabindex="-1">Choose your theme</h2>
+        <p>Pick a look for your workspace.</p>
+        <fieldset class="settings-theme-options">
+          <legend class="sr-only">Color mode</legend>
+          <label class="settings-theme-option" data-theme-card="dark"><input class="sr-only" type="radio" name="welcome-theme" value="dark" checked><span class="settings-theme-preview" aria-hidden="true"><i></i><i></i><i></i></span><span><svg aria-hidden="true"><use href="#i-moon"/></svg>Graphite</span></label>
+          <label class="settings-theme-option" data-theme-card="light"><input class="sr-only" type="radio" name="welcome-theme" value="light"><span class="settings-theme-preview" aria-hidden="true"><i></i><i></i><i></i></span><span><svg aria-hidden="true"><use href="#i-sun"/></svg>Light</span></label>
+          <label class="settings-theme-option" data-theme-card="system"><input class="sr-only" type="radio" name="welcome-theme" value="system"><span class="settings-theme-preview" aria-hidden="true"><i></i><i></i><i></i></span><span><svg aria-hidden="true"><use href="#i-monitor"/></svg>Follow Windows</span></label>
+        </fieldset>
+      </section>
+      <p id="onboarding-error" role="status" hidden></p>
+      <footer class="project-dialog-footer"><button id="onboarding-back" type="button" hidden>Back</button><button id="onboarding-next" type="submit">Continue</button></footer>
+    </form>
+  </dialog>
+  <dialog id="project-actions-dialog" aria-labelledby="project-actions-heading">
+    <header class="project-dialog-header"><h2 id="project-actions-heading">Project commands</h2><form method="dialog"><button class="icon" aria-label="Close commands"><svg aria-hidden="true"><use href="#i-close"/></svg></button></form></header>
+    <div id="project-command-list"></div>
+    <div id="project-command-runs"></div>
+    <p id="project-command-status" role="status"></p>
+  </dialog>
+</body>
+</html>

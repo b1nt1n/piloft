@@ -1,0 +1,74 @@
+.search-categories {
+  display: flex;
+  gap: 4px;
+}
+
+.search-categories button {
+  min-height: 29px;
+  padding-inline: 10px;
+  font-size: .88em;
+  color: var(--muted);
+}
+
+.search-categories button[aria-pressed="true"],
+.search-result[data-search-active] {
+  background: var(--active);
+  color: var(--text);
+}
+
+.search-result-section + .search-result-section { margin-top: 10px; }
+
+.search-result-section h3 {
+  margin: 0 8px 3px;
+  color: var(--muted);
+  font-size: .8em;
+}
+
+.search-result > span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.view-find {
+  position: fixed;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: min(355px, calc(100vw - 16px));
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--raised);
+  box-shadow: 0 5px 14px #0003;
+}
+
+.view-find input {
+  min-width: 0;
+  flex: 1;
+  height: 30px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--canvas);
+}
+
+.view-find button {
+  flex: none;
+  width: 28px;
+  min-height: 29px;
+  padding: 0;
+}
+
+.view-find-result {
+  flex: none;
+  padding-inline: 3px;
+  color: var(--muted);
+  font-size: .85em;
+  font-variant-numeric: tabular-nums;
+}
+
+::highlight(freepi-matches) { background: #ffe18b; color: #221b0d; }
+::highlight(freepi-match) { background: #ffb351; color: #221b0d; }

@@ -1,0 +1,52 @@
+{
+  "name": "free-pi-desktop",
+  "version": "0.1.0-alpha.5",
+  "private": true,
+  "productName": "free-pi-cli Desktop",
+  "description": "Unofficial Windows desktop client for free-pi-cli",
+  "author": "free-pi-cli Desktop contributors",
+  "license": "MIT",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "powershell.exe -NoProfile -File build/windows.ps1 && electron-builder --win nsis --x64 --publish never"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "5.3.0",
+    "@fontsource-variable/source-sans-3": "5.3.1",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@highlightjs/cdn-assets": "11.12.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
+    "markdown-it": "15.0.3",
+    "node-pty": "1.1.0"
+  },
+  "devDependencies": {
+    "electron": "45.3.2",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "FreePi.Desktop",
+    "compression": "store",
+    "artifactName": "free-pi-cli-desktop-${version}-${arch}-setup.${ext}",
+    "files": ["*.js", "*.cjs", "*.css", "index.html", "assets/freepi-logo.svg", "LICENSE", "THIRD-PARTY-NOTICES.md"],
+    "extraResources": [
+      {"from": "assets/freepi-icon.ico", "to": "assets/freepi-icon.ico"},
+      {"from": "build/node-runtime", "to": "node-runtime", "filter": ["node.exe", "LICENSE"]},
+      {"from": "build/node-runtime/node_modules/npm", "to": "node-runtime/node_modules/npm"},
+      {"from": "build/node-runtime/node_modules/npm/node_modules", "to": "node-runtime/node_modules/npm/node_modules"}
+    ],
+    "asarUnpack": ["node_modules/node-pty/**"],
+    "npmRebuild": false,
+    "win": {
+      "icon": "assets/freepi-icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "free-pi-cli Desktop"
+    }
+  }
+}
