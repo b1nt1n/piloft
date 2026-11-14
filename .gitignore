@@ -1,6 +1,6 @@
 node_modules/
 dist/
-build/node-runtime/
+/app/build/node-runtime/
 .env
 .env.*
 *.log

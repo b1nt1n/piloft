@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/freepi-logo.svg" width="88" alt="free-pi-cli Desktop icon">
+  <img src="app/assets/freepi-logo.svg" width="88" alt="free-pi-cli Desktop icon">
   <h1>free-pi-cli Desktop</h1>
   <p>An unofficial Windows desktop app for the official <a href="https://github.com/dennisonbertram/free-pi-cli">free-pi CLI</a>. Chat, review changes, and manage projects in one window.</p>
   <p>
@@ -42,14 +42,15 @@ Node.js and npm are bundled. The first run downloads the official CLI, and reque
 
 ## Build from source
 
-Use Windows x64 and Node.js 22.15 or later.
+The [desktop source](app/) requires Windows x64 and Node.js 22.15 or later. Run these commands from the repository root.
 
 ```powershell
+Set-Location app
 npm.cmd ci
 npm.cmd start
 ```
 
-Run `npm.cmd run build:win` to build a Windows installer in `dist/`.
+From `app/`, run `npm.cmd run build:win` to build a Windows installer in `app/dist/`.
 
 ## FreePi service and data
 

@@ -29,7 +29,10 @@
     "appId": "FreePi.Desktop",
     "compression": "store",
     "artifactName": "free-pi-cli-desktop-${version}-${arch}-setup.${ext}",
-    "files": ["*.js", "*.cjs", "*.css", "index.html", "assets/freepi-logo.svg", "LICENSE", "THIRD-PARTY-NOTICES.md"],
+    "files": [
+      "*.js", "*.cjs", "*.css", "index.html", "assets/freepi-logo.svg",
+      {"from": "..", "to": ".", "filter": ["LICENSE", "THIRD-PARTY-NOTICES.md"]}
+    ],
     "extraResources": [
       {"from": "assets/freepi-icon.ico", "to": "assets/freepi-icon.ico"},
       {"from": "build/node-runtime", "to": "node-runtime", "filter": ["node.exe", "LICENSE"]},
