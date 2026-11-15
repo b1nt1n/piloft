@@ -20,10 +20,10 @@ const { createAttachments } = require('./attachments.cjs');
 const { createProjectCommands } = require('./desktop-tools.cjs');
 const { createJobs } = require('./desktop-jobs.cjs');
 
-const productName = 'free-pi-cli Desktop';
+const productName = 'PiLoft';
 const testedCli = '0.6.21';
-if (!app.commandLine.hasSwitch('user-data-dir')
-  && (app.isPackaged || path.basename(app.getPath('userData')) === productName)) {
+// Keep the existing Desktop profile available after the product rename.
+if (!app.commandLine.hasSwitch('user-data-dir')) {
   app.setPath('userData', path.join(app.getPath('appData'), 'free-pi-desktop'));
 }
 const agentDir = path.join(homedir(), '.free-pi', 'agent');
@@ -209,7 +209,7 @@ ipcMain.handle('tasks:update', (_event, action, input) => jobs.update(action, in
 
 ipcMain.handle('desktop:notification-shortcut', () => {
   const programs = path.join(app.getPath('appData'), 'Microsoft', 'Windows', 'Start Menu', 'Programs');
-  const link = path.join(programs, 'FreePi Desktop.lnk');
+  const link = path.join(programs, `${productName}.lnk`);
   const icon = windowIconPath;
   if (!shell.writeShortcutLink(link, { target: process.execPath, args: app.isPackaged ? '' : `"${__dirname}"`,
     cwd: app.isPackaged ? path.dirname(process.execPath) : __dirname, description: productName, icon, iconIndex: 0, appUserModelId: notificationAppId,

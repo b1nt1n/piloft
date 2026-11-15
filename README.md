@@ -1,16 +1,16 @@
 <div align="center">
-  <img src="app/assets/freepi-logo.svg" width="88" alt="free-pi-cli Desktop icon">
-  <h1>free-pi-cli Desktop</h1>
+  <img src="app/assets/freepi-logo.svg" width="88" alt="PiLoft icon">
+  <h1>PiLoft</h1>
   <p>An unofficial Windows desktop app for the official <a href="https://github.com/dennisonbertram/free-pi-cli">free-pi CLI</a>. Chat, review changes, and manage projects in one window.</p>
   <p>
     <img alt="Desktop version 0.1.0-alpha.5" src="https://img.shields.io/badge/Desktop-0.1.0--alpha.5-416485">
     <img alt="Windows x64" src="https://img.shields.io/badge/Windows-x64-416485">
     <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-586069"></a>
   </p>
-  <p><a href="https://github.com/b1nt1n/free-pi-cli-desktop/releases">Releases</a> · <a href="#install">Install</a> · <a href="#screenshots">Screenshots</a> · <a href="CHANGELOG.md">Changelog</a></p>
+  <p><a href="https://github.com/b1nt1n/piloft/releases">Releases</a> · <a href="#install">Install</a> · <a href="#screenshots">Screenshots</a> · <a href="CHANGELOG.md">Changelog</a></p>
 </div>
 
-![FreePi Desktop chat with expanded model reasoning and the Overview panel](assets/screenshots/alpha.5/workspace-overview.png)
+![PiLoft chat with expanded model reasoning and the Overview panel](assets/screenshots/alpha.5/workspace-overview.png)
 
 ## What it does
 
@@ -21,11 +21,13 @@
 
 ## Install
 
-1. In this repository's **Releases**, download the Windows x64 setup `.exe`. The installer is unsigned.
+1. In this repository's **Releases**, download the PiLoft Windows x64 setup `.exe`. The installer is unsigned.
 2. Choose English or Russian and a theme, then select a project folder.
 3. Review the FreePi terms in the built-in terminal and connect your GitHub account.
 
 Node.js and npm are bundled. The first run downloads the official CLI, and requests require an internet connection. Install Git to use text diffs. The default CLI version is **0.6.21**. Use **Settings → General** to switch to `latest` if FreePi requires an update.
+
+Upgrading from the earlier Windows app named **free-pi-cli Desktop** uses the existing Desktop settings and free-pi sign-in and chat history.
 
 ## Screenshots
 

@@ -1,10 +1,10 @@
 {
-  "name": "free-pi-desktop",
+  "name": "piloft",
   "version": "0.1.0-alpha.5",
   "private": true,
-  "productName": "free-pi-cli Desktop",
+  "productName": "PiLoft",
   "description": "Unofficial Windows desktop client for free-pi-cli",
-  "author": "free-pi-cli Desktop contributors",
+  "author": "PiLoft contributors",
   "license": "MIT",
   "main": "main.cjs",
   "scripts": {
@@ -28,7 +28,7 @@
   "build": {
     "appId": "FreePi.Desktop",
     "compression": "store",
-    "artifactName": "free-pi-cli-desktop-${version}-${arch}-setup.${ext}",
+    "artifactName": "piloft-${version}-${arch}-setup.${ext}",
     "files": [
       "*.js", "*.cjs", "*.css", "index.html", "assets/freepi-logo.svg",
       {"from": "..", "to": ".", "filter": ["LICENSE", "THIRD-PARTY-NOTICES.md"]}
@@ -49,7 +49,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "shortcutName": "free-pi-cli Desktop"
+      "shortcutName": "PiLoft"
     }
   }
 }

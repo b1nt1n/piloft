@@ -343,7 +343,7 @@
     renderSkills();
   });
   byId('desktop-copy-diagnostics').onclick = async () => {
-    const text = [`FreePi Desktop ${byId('desktop-app-version').textContent}`, `CLI: ${byId('desktop-cli-version').textContent}`,
+    const text = [`PiLoft ${byId('desktop-app-version').textContent}`, `CLI: ${byId('desktop-cli-version').textContent}`,
       t("Model: {0}", byId('settings-model').textContent), t("Status: {0}", state.execution?.state ?? (state.ready ? 'ready' : 'unavailable')),
       t("Skills in catalog: {0}", catalog.filter(item => item.source === 'skill').length),
       t("Git branch: {0}", byId('project-context')?.textContent.split(' · ')[1] || '—')].join('\n');

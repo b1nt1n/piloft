@@ -205,7 +205,7 @@ export default function observe(pi) {
   });
 
   pi.registerCommand('desktop-fork', {
-    description: 'Fork from a message in FreePi Desktop',
+    description: 'Fork from a message in PiLoft',
     argumentHint: '<message-id>',
     handler: async (args, ctx) => {
       const entry = ctx.sessionManager.getBranch().find(item => item.id === args.trim() && item.type === 'message'

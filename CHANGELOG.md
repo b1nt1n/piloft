@@ -2,6 +2,7 @@
 
 ## 0.1.0-alpha.5
 
+- Renamed the Windows desktop app to PiLoft. Updates reuse the existing Desktop profile and free-pi CLI data.
 - Stream and expand model reasoning in the chat timeline alongside tool calls.
 - Inspect chat context, compact long chats, and save an instruction that is included with the first message in a new chat.
 - Attach any file type, preview images and text, and reveal saved attachments in File Explorer from chat history.

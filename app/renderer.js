@@ -1054,7 +1054,7 @@ bridge.onClosing(async () => {
   if (closingWindow) return;
   const idle = !running || (screen.ready && !pending && !activeOccupied());
   if ((!idle || window.desktopSettingsUI?.preferences.confirmClose)
-    && !window.confirm(idle ? t("Close FreePi Desktop?") : t("Stop the current free-pi process?"))) return;
+    && !window.confirm(idle ? t("Close PiLoft?") : t("Stop the current free-pi process?"))) return;
   closingWindow = true;
   window.desktopDrafts.cancelQueue();
   await window.desktopDrafts.flush();
