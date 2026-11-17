@@ -271,9 +271,12 @@ export default function observe(pi) {
       entry.type === 'message' && entry.message.role === 'user' && entry.message.timestamp === userTimestamp);
     if (user) send({ type: 'user', sessionId: activeSession, messageId: user.id, timestamp: userTimestamp });
     const last = ctx.sessionManager.getBranch().findLast(entry => entry.type === 'message' && entry.message.role === 'assistant');
-    const failed = last?.message.stopReason === 'error'
-      && (userTimestamp === undefined || last.message.timestamp >= userTimestamp);
-    send({ type: 'settled', sessionId: activeSession, aborted: Boolean(aborted), failed });
+    const reply = last && (userTimestamp === undefined || last.message.timestamp >= userTimestamp) ? last.message : undefined;
+    const failed = reply?.stopReason === 'error';
+    const preview = !aborted && !failed && Array.isArray(reply?.content)
+      ? reply.content.find(block => block?.type === 'text' && typeof block.text === 'string' && block.text.trim())?.text.trim().slice(0, 900)
+      : undefined;
+    send({ type: 'settled', sessionId: activeSession, aborted: Boolean(aborted), failed, preview });
     userTimestamp = undefined;
   });
 

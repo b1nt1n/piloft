@@ -2,6 +2,10 @@
 
 ## 0.1.0-alpha.5
 
+- Show unread chats on the Windows taskbar and preview replies or confirmation requests in notifications.
+- Set tool calls to Brief, Full, or Hide in chat. Failed calls stay visible.
+- Show unsaved changes and save results in General settings.
+- Start the new-project folder picker in Documents, including when the current project is in Temp.
 - Renamed the Windows desktop app to PiLoft. Updates reuse the existing Desktop profile and free-pi CLI data.
 - Stream and expand model reasoning in the chat timeline alongside tool calls.
 - Inspect chat context, compact long chats, and save an instruction that is included with the first message in a new chat.

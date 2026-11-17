@@ -34,6 +34,8 @@ contextBridge.exposeInMainWorld('desktop', {
   stopProjectAction: id => ipcRenderer.invoke('actions:stop', id),
   onProjectActions: listener => ipcRenderer.on('actions:changed', (_event, value) => listener(value)),
   tasks: (action, input) => ipcRenderer.invoke('tasks:update', action, input),
+  readUnreadChats: () => ipcRenderer.invoke('desktop:unread-chats'),
+  updateChatAttention: (chats, waiting, badge) => ipcRenderer.send('desktop:chat-attention', { chats, waiting, badge }),
   notify: notice => ipcRenderer.invoke('desktop:notify', notice),
   registerNotificationShortcut: () => ipcRenderer.invoke('desktop:notification-shortcut'),
   onNotificationClick: listener => ipcRenderer.on('desktop:notification-click', (_event, value) => listener(value)),

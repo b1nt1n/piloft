@@ -1,5 +1,5 @@
 const { t, setLanguage } = require('./locale.js');
-const { app, BrowserWindow, dialog, ipcMain, Notification, screen, session, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, nativeImage, Notification, screen, session, shell } = require('electron');
 const { execFile } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const { promisify } = require('node:util');
@@ -47,6 +47,7 @@ let liveChannel;
 let launching = false;
 let closing = false;
 const notifications = new Set();
+let taskbarCount;
 const commands = createProjectCommands(value => send('actions:changed', value));
 const jobs = createJobs({ read: readWorkspace, save: saveWorkspace, validFolder: isFolder,
   schedulesEnabled: () => desktopSettings().experimentalSchedules,
@@ -125,7 +126,7 @@ function desktopSettings() {
   return {
     editor: 'notepad', actionShell: 'powershell', restoreChat: true, confirmClose: false, model: '', thinking: '',
     cliChannel: 'stable', experimentalSchedules: false,
-    language: 'en', onboardingComplete: false, initialPrompt: '',
+    language: 'en', onboardingComplete: false, initialPrompt: '', toolOutput: 'compact',
     notifications: { done: true, confirmation: true, failed: true },
     ...readWorkspace().desktopSettings,
   };
@@ -161,6 +162,7 @@ ipcMain.handle('settings:save', (_event, input) => {
     cliChannel: input?.cliChannel === 'latest' ? 'latest' : 'stable',
     experimentalSchedules: input?.experimentalSchedules === true,
     initialPrompt: typeof input?.initialPrompt === 'string' ? input.initialPrompt.replace(/\r\n?/g, '\n').trim().slice(0, 8000) : '',
+    toolOutput: ['full', 'hidden'].includes(input?.toolOutput) ? input.toolOutput : 'compact',
     language: input?.language === 'ru' ? 'ru' : 'en',
     onboardingComplete: desktopSettings().onboardingComplete,
     notifications: Object.fromEntries(['done', 'confirmation', 'failed'].map(key => [key, input?.notifications?.[key] === true])),
@@ -216,12 +218,57 @@ ipcMain.handle('desktop:notification-shortcut', () => {
     toastActivatorClsid: notificationActivator })) throw new Error(t("Could not create the Start menu shortcut."));
 });
 
-ipcMain.handle('desktop:notify', (_event, { kind, folder, sessionId, otherChat } = {}) => {
+function unreadChats(value) {
+  const chats = new Map();
+  for (const item of Array.isArray(value) ? value : []) {
+    if (typeof item?.folder !== 'string' || !path.isAbsolute(item.folder)
+      || typeof item.sessionId !== 'string' || !sessionIdPattern.test(item.sessionId)
+      || !['done', 'failed'].includes(item.state)) continue;
+    const { folder, sessionId, state } = item;
+    chats.set(folder.toLowerCase() + '\0' + sessionId, { folder, sessionId, state });
+  }
+  return [...chats.values()];
+}
+
+ipcMain.handle('desktop:unread-chats', () => unreadChats(readWorkspace().unreadChats));
+
+ipcMain.on('desktop:chat-attention', (event, { chats, waiting, badge } = {}) => {
+  if (event.sender !== window?.webContents) return;
+  const unread = unreadChats(chats);
+  if (JSON.stringify(unread) !== JSON.stringify(readWorkspace().unreadChats ?? [])) saveWorkspace({ unreadChats: unread });
+  const count = unread.length + Number(waiting === true);
+  if (count === taskbarCount) return;
+  if (count) {
+    if (typeof badge !== 'string' || !badge.startsWith('data:image/png;base64,') || badge.length > 8192) return;
+    const icon = nativeImage.createFromDataURL(badge);
+    if (icon.isEmpty()) return;
+    window.setOverlayIcon(icon, t("Unread chats: {0}", count));
+  } else {
+    window.setOverlayIcon(null, '');
+  }
+  taskbarCount = count;
+});
+
+function notificationExcerpt(value, markdown) {
+  if (typeof value !== 'string') return '';
+  let text = value.slice(0, 900);
+  if (markdown) {
+    text = text.replace(/^```[^\n]*$/gm, '').replace(/^\s*(?:#{1,6}\s+|>\s*|[-*+]\s+)/gm, '')
+      .replace(/!?\[([^\]]*)\]\([^)]+\)/g, '$1').replace(/(\*\*|__|`)(.*?)\1/g, '$2');
+  }
+  const preview = Array.from(text.replace(/[\p{Cc}\p{Cf}\s]+/gu, ' ').trim());
+  return preview.length > 160 ? preview.slice(0, 159).join('').trimEnd() + '…' : preview.join('');
+}
+
+ipcMain.handle('desktop:notify', (_event, { kind, folder, sessionId, otherChat, preview } = {}) => {
   const titles = { done: t("Reply ready"), failed: t("Request interrupted or failed"), confirmation: t("Confirmation needed") };
   if (!Object.hasOwn(titles, kind) || !desktopSettings().notifications?.[kind] || !Notification.isSupported()
     || !isFolder(folder) || typeof sessionId !== 'string' || !sessionIdPattern.test(sessionId)
     || (window?.isFocused() && otherChat !== true)) return;
-  const notification = new Notification({ title: titles[kind], body: path.basename(folder), silent: false,
+  const project = path.basename(folder);
+  const excerpt = notificationExcerpt(preview, kind === 'done');
+  const title = excerpt && project ? `${titles[kind]} · ${project}` : titles[kind];
+  const notification = new Notification({ title, body: excerpt || project, silent: false,
     icon: windowIconPath });
   notifications.add(notification);
   const forget = () => notifications.delete(notification);

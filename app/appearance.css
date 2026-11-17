@@ -97,6 +97,8 @@ body:not([data-motion="reduced"]) #settings-panel[open]::backdrop { animation: s
 .settings-card { border: 1px solid var(--line); border-radius: 12px; margin: 0; background: color-mix(in srgb, var(--surface) 55%, var(--canvas)); }
 .settings-save-bar { position: sticky; z-index: 1; inset-block-end: 0; display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-block-start: 14px; padding: 10px 0; border-block-start: 1px solid var(--line); background: var(--canvas); }
 .settings-save-bar output { margin-inline-end: auto; color: var(--muted); overflow-wrap: anywhere; }
+.settings-save-bar output[data-state="saved"] { color: var(--positive); }
+.settings-save-bar output[data-state="error"], #desktop-tools-status { color: var(--negative); }
 .settings-save-bar button { flex: none; padding-inline: 14px; color: var(--button-fg); background: var(--button-bg); font-weight: 700; }
 .settings-save-bar button:hover { color: var(--button-fg); background: color-mix(in srgb, var(--button-bg) 86%, var(--accent)); }
 #schedule-editor { margin-block-start: 9px; }

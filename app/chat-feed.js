@@ -14,6 +14,7 @@
   let historyFeed;
   let following = true;
   let renderFrame;
+  let toolOutput = 'compact';
   const pluralFiles = new Intl.PluralRules(document.documentElement.lang);
 
   const toolTitles = {
@@ -198,6 +199,10 @@
     return section;
   }
 
+  function failedTool(entry) {
+    return entry.result?.isError || entry.live?.state === 'error';
+  }
+
   function updateTool(details, { call, result, live }) {
     const name = call?.name || result?.toolName || live?.toolName || t("Tool");
     const args = live?.args ?? call?.arguments;
@@ -252,6 +257,7 @@
     }
     if (entry.type === 'tool') {
       const details = element('details', 'chat-tool');
+      details.open = toolOutput === 'full';
       details.append(element('summary', 'chat-tool-summary'), element('div', 'chat-tool-body'));
       updateTool(details, entry);
       return details;
@@ -428,6 +434,7 @@
     let group = toolGroups.get(key);
     if (!group) {
       group = element('details', 'chat-tool chat-tool-group');
+      group.open = toolOutput === 'full';
       group.append(
         element('summary', 'chat-tool-summary chat-tool-group-summary'),
         element('div', 'chat-tool-group-body'),
@@ -445,7 +452,7 @@
     const name = running?.live.toolName;
     const label = reading ? t("Read {0} {1}", count, files)
       : running ? t("{0} · actions: {1}", toolTitles[name] ?? name, count) : t("Actions: {0}", count);
-    group.dataset.status = running ? 'running' : entries.some(entry => entry.result?.isError || entry.live?.state === 'error') ? 'error' : 'done';
+    group.dataset.status = running ? 'running' : entries.some(failedTool) ? 'error' : 'done';
     const summary = group.firstElementChild;
     if (summary.textContent !== label) summary.textContent = label;
     appendInOrder(group.lastElementChild, tools);
@@ -494,7 +501,7 @@
     const state = historyFeed ?? activeFeed;
     const atBottom = changedSession || (following && nearBottom());
     const focused = document.activeElement;
-    const entries = entriesFor(state);
+    const entries = entriesFor(state).filter(entry => toolOutput !== 'hidden' || entry.type !== 'tool' || failedTool(entry));
     const keys = new Set(entries.map(entry => entry.key));
     for (const [key, row] of rows) {
       if (keys.has(key)) continue;
@@ -553,6 +560,16 @@
   }
 
   let runClock;
+  document.addEventListener('freepi:desktop-settings', () => {
+    const mode = window.desktopSettingsUI.preferences.toolOutput;
+    if (mode === toolOutput) return;
+    toolOutput = mode;
+    for (const { node } of rows.values()) {
+      if (node.matches('details.chat-tool')) node.open = mode === 'full';
+    }
+    for (const group of toolGroups.values()) group.open = mode === 'full';
+    renderFeed();
+  });
   document.addEventListener('freepi:diff-history', () => renderFeed());
   document.addEventListener('freepi:history-view', ({ detail }) => {
     const changed = historyFeed?.sessionId !== detail.sessionId || historyFeed?.folder !== detail.folder;

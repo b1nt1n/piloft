@@ -937,9 +937,9 @@ body[data-chat-width="narrow"] { --content-width: 620px; }
 body[data-chat-width="wide"] { --content-width: 1000px; }
 body[data-chat-density="compact"] { --chat-gap: 11px; }
 body[data-chat-density="relaxed"] { --chat-gap: 29px; }
-.segments { display: flex; flex-wrap: wrap; gap: 5px; }
+.segments { display: flex; flex: none; gap: 5px; }
 .segments button { min-height: 30px; border-color: var(--line); font-size: 12px; }
-.segments button[aria-pressed="true"] { color: var(--accent); background: var(--active); }
+.segments button[aria-pressed="true"] { color: var(--button-fg); background: var(--button-bg); font-weight: 700; }
 #search {
   width: calc(100% - 4px);
   padding: 6px 9px;

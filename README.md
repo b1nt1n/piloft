@@ -19,6 +19,8 @@
 | Stream Markdown and model reasoning, inspect the context reported by the CLI, and choose the model and reasoning level. | Switch between saved chats, check tasks and command results, and reopen a saved diff from the conversation. |
 | Attach files, preview text and images, and show saved attachments in File Explorer. | Start a chat in a Git worktree, review changes line by line, and keep review-comment drafts across restarts. |
 
+The Windows taskbar shows how many chats need attention. Notifications can include a short reply or confirmation preview.
+
 ## Install
 
 1. In this repository's **Releases**, download the PiLoft Windows x64 setup `.exe`. The installer is unsigned.

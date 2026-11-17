@@ -16,9 +16,14 @@
     if (workspaceMenu.contains(target) || target === document.body) workspaceMenuTrigger.focus({ preventScroll: true });
   }, true);
   const checks = [...settings.querySelectorAll('[data-notification-kind]')];
+  const generalForm = byId('desktop-preferences');
+  const generalSave = settings.querySelector('button[form="desktop-preferences"]');
+  const generalStatus = byId('desktop-settings-status');
+  const toolButtons = [...settings.querySelectorAll('[data-tools]')];
+  const toolsStatus = byId('desktop-tools-status');
   const defaults = { editor: 'notepad', actionShell: 'powershell', restoreChat: true, confirmClose: false,
     cliChannel: 'stable', experimentalSchedules: false,
-    language: 'en', onboardingComplete: false, initialPrompt: '',
+    language: 'en', onboardingComplete: false, initialPrompt: '', toolOutput: 'compact',
     model: '', thinking: '', notifications: { done: true, confirmation: true, failed: true } };
   let prefs = defaults;
   let startFolder;
@@ -35,6 +40,9 @@
   let noticeStates = new Map();
   let notificationTarget;
   let savePreferences = Promise.resolve();
+  let preferencesLoaded = false;
+  let generalSaving = false;
+  let toolsSaving = false;
   const customModel = ':custom:';
   const modelDefaults = { 'desktop-model': t("CLI default"), 'profile-model': t("Use general settings") };
   function modelValue(id) {
@@ -106,33 +114,64 @@
     byId('workbench-editor').textContent = prefs.editor === 'notepad' ? t("Open in Notepad") : t("Open in editor");
     byId('schedules-disabled').hidden = Boolean(prefs.experimentalSchedules);
     byId('schedule-editor').hidden = !prefs.experimentalSchedules;
+    syncToolButtons();
     document.dispatchEvent(new Event('freepi:desktop-settings'));
   }
 
-  function saveSettings(patch, output) {
-    savePreferences = savePreferences.then(async () => {
-      try {
-        prefs = await port.saveDesktopSettings({ ...prefs, ...patch });
-        if (patch.language && prefs.language !== window.freepiLocale.language) {
-          const restarted = await window.freepiOnboarding.changeLanguage(prefs.language);
-          if (!restarted) output.textContent = t("Language saved. Restart when the CLI is idle.");
-          return;
-        }
-        syncPreferences(!patch.notifications);
-        output.textContent = t("Saved");
-      } catch (error) {
-        output.textContent = errorText(error);
-      }
+  function saveSettings(patch) {
+    const saved = savePreferences.then(async () => {
+      prefs = await port.saveDesktopSettings({ ...prefs, ...patch });
     });
+    savePreferences = saved.catch(() => {});
+    return saved;
   }
 
-  byId('desktop-preferences').onsubmit = event => {
-    event.preventDefault();
-    saveSettings({ startFolder, editor: byId('desktop-editor').value, actionShell: byId('desktop-shell').value,
+  function generalValues() {
+    return { startFolder, editor: byId('desktop-editor').value, actionShell: byId('desktop-shell').value,
       restoreChat: byId('desktop-restore-chat').checked, confirmClose: byId('desktop-confirm-close').checked,
       cliChannel: byId('desktop-cli-channel').value, experimentalSchedules: byId('desktop-enable-schedules').checked,
-      language: byId('interface-language').value, initialPrompt: byId('desktop-initial-prompt').value,
-      model: modelValue('desktop-model'), thinking: byId('desktop-thinking').value }, byId('desktop-settings-status'));
+      language: byId('interface-language').value, initialPrompt: byId('desktop-initial-prompt').value.trim(),
+      model: modelValue('desktop-model'), thinking: byId('desktop-thinking').value };
+  }
+
+  function generalChanged(values, baseline) {
+    return Object.entries(values).some(([key, value]) => value !== baseline[key]);
+  }
+
+  function updateGeneralStatus(kind = '', message = '') {
+    const dirty = preferencesLoaded && generalChanged(generalValues(), prefs);
+    generalSave.disabled = generalSaving || !dirty;
+    generalStatus.dataset.state = kind;
+    generalStatus.textContent = generalSaving ? t("Saving…") : message || (dirty ? t("Unsaved changes") : '');
+  }
+
+  generalForm.addEventListener('input', () => updateGeneralStatus());
+  generalForm.addEventListener('change', () => updateGeneralStatus());
+  generalForm.onsubmit = async event => {
+    event.preventDefault();
+    if (generalSave.disabled) return;
+    const values = generalValues();
+    generalSaving = true;
+    updateGeneralStatus();
+    let feedback;
+    let kind;
+    try {
+      await saveSettings(values);
+      syncPreferences(!generalChanged(generalValues(), values));
+      if (prefs.language !== window.freepiLocale.language) {
+        const restarted = await window.freepiOnboarding.changeLanguage(prefs.language);
+        if (!restarted) feedback = t("Language saved. Restart when the CLI is idle.");
+      } else if (settings.open && !byId('settings-general').hidden && !generalChanged(generalValues(), prefs)) {
+        feedback = t("Saved");
+      }
+      if (feedback) kind = 'saved';
+    } catch (error) {
+      kind = 'error';
+      feedback = errorText(error);
+    } finally {
+      generalSaving = false;
+      updateGeneralStatus(kind, feedback);
+    }
   };
   byId('desktop-pick-start').onclick = async () => {
     try {
@@ -140,16 +179,46 @@
       if (selected) {
         startFolder = selected;
         byId('desktop-start-folder').textContent = selected;
+        updateGeneralStatus();
       }
-    } catch (error) { byId('desktop-settings-status').textContent = errorText(error); }
+    } catch (error) { updateGeneralStatus('error', errorText(error)); }
   };
   byId('desktop-reset-start').onclick = () => {
     startFolder = undefined;
     byId('desktop-start-folder').textContent = t("Default folder");
+    updateGeneralStatus();
   };
-  for (const check of checks) check.onchange = () => {
-    saveSettings({ notifications: Object.fromEntries(checks.map(item => [item.dataset.notificationKind, item.checked])) },
-      byId('desktop-notification-status'));
+  for (const check of checks) check.onchange = async () => {
+    const output = byId('desktop-notification-status');
+    try {
+      await saveSettings({ notifications: Object.fromEntries(checks.map(item => [item.dataset.notificationKind, item.checked])) });
+      syncPreferences(false);
+      output.textContent = t("Saved");
+    } catch (error) { output.textContent = errorText(error); }
+  };
+
+  function syncToolButtons() {
+    for (const button of toolButtons) {
+      button.setAttribute('aria-pressed', String(button.dataset.tools === prefs.toolOutput));
+      button.disabled = !preferencesLoaded || toolsSaving;
+    }
+  }
+
+  for (const button of toolButtons) button.onclick = async () => {
+    if (button.dataset.tools === prefs.toolOutput) return;
+    toolsSaving = true;
+    syncToolButtons();
+    toolsStatus.hidden = true;
+    try {
+      await saveSettings({ toolOutput: button.dataset.tools });
+      syncPreferences(false);
+    } catch (error) {
+      toolsStatus.textContent = errorText(error);
+      toolsStatus.hidden = false;
+    } finally {
+      toolsSaving = false;
+      syncToolButtons();
+    }
   };
   byId('desktop-enable-notifications').onclick = async () => {
     const status = byId('desktop-notification-status');
@@ -259,12 +328,14 @@
 
   let explicitProject;
   document.addEventListener('freepi:settings-page', ({ detail }) => {
+    if (detail !== 'general' && generalStatus.dataset.state === 'saved') updateGeneralStatus();
     if (detail === 'integrations') void renderIntegrationCatalog(state.folder);
     if (detail !== 'project') return;
     void loadProfile(explicitProject ?? state.folder);
     explicitProject = undefined;
   });
   settings.addEventListener('close', () => {
+    if (generalStatus.dataset.state === 'saved') updateGeneralStatus();
     search.value = '';
     search.oninput();
   });
@@ -428,18 +499,19 @@
     byId('project-actions').disabled = !detail.folder;
     updateTrust();
     const work = detail.execution;
-    if (work?.state === 'confirmation') {
-      const key = work.folder.toLowerCase() + '\0' + work.sessionId;
+    if (work?.state !== 'confirmation') lastNotification = '';
+    else if (detail.confirmationUnread) {
+      const key = chatKey(work.folder, work.sessionId) + '\0' + work.confirmationSequence;
       if (lastNotification !== key) {
         lastNotification = key;
         notice('confirmation', work);
       }
-    } else lastNotification = '';
+    }
     const current = new Map();
     for (const item of detail.completedChats) {
-      const key = item.folder.toLowerCase() + '\0' + item.sessionId;
-      current.set(key, item.state);
-      if (noticeStates.get(key) !== item.state) notice(item.state, item);
+      const key = chatKey(item.folder, item.sessionId);
+      current.set(key, item.sequence);
+      if (!item.restored && noticeStates.get(key) !== item.sequence) notice(item.state, item);
     }
     noticeStates = current;
     if (notificationTarget) queueMicrotask(openNotification);
@@ -447,7 +519,7 @@
   function notice(kind, item) {
     if (!prefs.notifications[kind]) return;
     const otherChat = !samePath(item.folder, state.folder) || item.sessionId !== state.sessionId;
-    void port.notify({ kind, folder: item.folder, sessionId: item.sessionId, otherChat }).catch(() => {});
+    void port.notify({ kind, folder: item.folder, sessionId: item.sessionId, otherChat, preview: item.preview }).catch(() => {});
   }
   function openNotification() {
     const target = notificationTarget;
@@ -455,8 +527,9 @@
     const same = samePath(target.folder, state.folder) && target.sessionId === state.sessionId;
     if (!same && !switchProject(target.folder, target.sessionId)) return;
     notificationTarget = undefined;
+    if (settings.open) window.freepiAppearance.show(false);
     if (target.kind === 'confirmation' && !byId('show-confirmation').hidden) byId('show-confirmation').click();
-    else if (same && !state.viewingHistory && !settings.open && document.getElementById('terminal-pane').dataset.open === 'true') showChat();
+    else if (same && !state.viewingHistory && byId('terminal-pane').dataset.open === 'true') showChat();
   }
   port.onNotificationClick(target => {
     notificationTarget = target;
@@ -472,9 +545,11 @@
       void port.desktopVersion().then(version => { byId('desktop-app-version').textContent = version; }).catch(() => {});
       try {
         prefs = await port.readDesktopSettings();
+        preferencesLoaded = true;
         syncPreferences();
+        updateGeneralStatus();
       } catch (error) {
-        byId('desktop-settings-status').textContent = errorText(error);
+        updateGeneralStatus('error', errorText(error));
       }
       return prefs;
     },

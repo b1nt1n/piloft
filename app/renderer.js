@@ -60,8 +60,7 @@ const stop = $('stop');
 const offer = $('offer');
 const thinkingLabel = $('thinking-label');
 const pickerUsage = $('picker-usage');
-const toolButtons = Array.from(document.querySelectorAll('[data-tools]'));
-const commandButtons = [$('model'), $('usage'), $('thinking'), $('integrations'), $('compact-chat'), $('workspace-fork'), ...toolButtons];
+const commandButtons = [$('model'), $('usage'), $('thinking'), $('integrations'), $('compact-chat'), $('workspace-fork')];
 const projectDialog = $('project-dialog');
 const projectName = $('project-name');
 const projectPath = $('project-location');
@@ -75,6 +74,12 @@ let viewed;
 let viewRequest = 0;
 let executionInFlight = false;
 const completedChats = new Map();
+let unreadLoaded = false;
+let attentionSignature;
+let seenConfirmation;
+let confirmationTitle;
+let confirmationSequence = 0;
+let completionSequence = 0;
 let running = false;
 let starting = false;
 let projectLocation;
@@ -164,17 +169,48 @@ function activeOccupied() {
   return running && (nativeBusy() || executionInFlight || nativeConfirmation() || pending === 'turn');
 }
 
-function rememberCompletion(state) {
-  if (folder && sessionId) completedChats.set(chatKey(folder, sessionId), { folder, sessionId, state });
+function rememberCompletion(state, preview) {
+  if (folder && sessionId) completedChats.set(chatKey(folder, sessionId),
+    { folder, sessionId, state, preview, sequence: ++completionSequence });
 }
 
-function acknowledgeVisibleChat() {
-  if (!completedChats.size || document.hidden || !document.hasFocus() || chatFeed.inert) return;
+function acknowledgeVisibleChat(waiting) {
+  if (document.hidden || !document.hasFocus() || document.querySelector('dialog[open]')) return;
+  if (waiting && !viewed && !terminalPane.inert) seenConfirmation = chatKey(folder, sessionId);
+  if (chatFeed.inert) return;
   if (viewed) {
     if (!viewed.loading && !viewed.error) completedChats.delete(chatKey(viewed.folder, viewed.sessionId));
-  } else if (!starting && !nextProject && pending !== 'switch' && !nativeConfirmation()) {
+  } else if (!starting && !nextProject && pending !== 'switch' && !waiting) {
     completedChats.delete(chatKey(folder, sessionId));
   }
+}
+
+function publishChatAttention(confirmationUnread) {
+  if (!unreadLoaded) return;
+  const waiting = confirmationUnread && !completedChats.has(chatKey(folder, sessionId));
+  const chats = [...completedChats.values()].map(({ folder, sessionId, state }) => ({ folder, sessionId, state }));
+  const signature = JSON.stringify({ chats, waiting });
+  if (signature === attentionSignature) return;
+  attentionSignature = signature;
+  const count = chats.length + Number(waiting);
+  let badge;
+  if (count) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    const label = count > 9 ? '9+' : String(count);
+    ctx.fillStyle = '#c62d40';
+    ctx.beginPath();
+    ctx.arc(16, 16, 15, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${label.length > 1 ? 19 : 23}px "Segoe UI"`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, 16, 16);
+    badge = canvas.toDataURL();
+  }
+  bridge.updateChatAttention(chats, waiting, badge);
 }
 
 function canSwitchFromHistory() {
@@ -344,15 +380,20 @@ function updateButtons() {
   stop.hidden = !busy;
   stop.disabled = !busy;
   $('restart').hidden = Boolean(viewed) || running || starting || !folder;
-  acknowledgeVisibleChat();
-  const currentState = nativeConfirmation() ? 'confirmation' : activeBusy ? 'working'
+  const waiting = nativeConfirmation();
+  if (!waiting) seenConfirmation = undefined;
+  acknowledgeVisibleChat(waiting);
+  const confirmationUnread = Boolean(waiting && folder && sessionId && seenConfirmation !== chatKey(folder, sessionId));
+  publishChatAttention(confirmationUnread);
+  const currentState = waiting ? 'confirmation' : activeBusy ? 'working'
     : completedChats.get(chatKey(folder, sessionId))?.state;
   const execution = sessionId && folder && currentState ? { folder, sessionId, state: currentState } : undefined;
+  if (waiting && execution) Object.assign(execution, { confirmationSequence, preview: confirmationTitle });
   if (viewed) updateHistoryBanner(execution);
   const detail = { folder: viewed?.folder ?? folder, activeFolder: folder,
     sessionId: viewed?.sessionId ?? (screen.ready || opened ? sessionId : null),
     canSwitch, canBrowse, viewingHistory: Boolean(viewed), running,
-    ready: !viewed && Boolean(screen.ready), busy, execution, completedChats: [...completedChats.values()],
+    ready: !viewed && Boolean(screen.ready), busy, execution, confirmationUnread, completedChats: [...completedChats.values()],
     startupStep: !opened ? readStartupStep(screen.lines) : undefined };
   detail.taskReady = Boolean(!collectingChanges && !starting && !nextProject && !closingWindow && !drafts.saving && !drafts.queued
     && !pending && !pickerKind && !showTerminal && !activeOccupied() && (!running || (screen.ready && terminal.modes.bracketedPasteMode)));
@@ -371,6 +412,9 @@ function updateButtons() {
 
 window.addEventListener('focus', updateButtons);
 document.addEventListener('visibilitychange', updateButtons);
+document.addEventListener('close', event => {
+  if (event.target instanceof HTMLDialogElement) updateButtons();
+}, true);
 
 function waitForScreen(kind) {
   pending = kind;
@@ -749,9 +793,6 @@ function syncScreen() {
   if (previousModel !== activeModel) thinkingLabel.textContent = t("Reasoning");
   const level = screen.thinking || (menu?.kind === 'thinking' && menu.entries.find(entry => entry.current)?.id);
   if (thinkingLabels[level]) thinkingLabel.textContent = thinkingLabels[level];
-  const toolMode = lines.findLast(line => /^\s*Tool calls are (?:now |shown )(compact|full|hidden)\b/.test(line))
-    ?.trim().match(/^Tool calls are (?:now |shown )(compact|full|hidden)\b/)?.[1];
-  if (toolMode) toolButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.tools === toolMode)));
   const usage = lines.findLastIndex(line => /^\s*tier: \S+/.test(line));
   const usageBalance = usage >= 0 && lines.slice(usage + 1, usage + 6).find(line => /credits left|daily allowance used/i.test(line));
   if (balance || usageBalance) {
@@ -857,10 +898,12 @@ terminal.parser.registerOscHandler(7501, data => {
   if (data === '?') bridge.write('\x1b]7501;?\x1b\\');
   else {
     const state = /^state=(idle|working|blocked|done|error|clear)(?=:|$)/.exec(data)?.[1];
-    if (state) {
+    if (state && state !== nativeStatus) {
       nativeStatus = state === 'clear' ? undefined : state;
       if (!observedSession && (state === 'done' || state === 'error')) rememberCompletion(state === 'done' ? 'done' : 'failed');
-      if (state === 'error' && !executionInFlight) rememberCompletion('failed');
+      else if (state === 'error' && !executionInFlight && completedChats.get(chatKey(folder, sessionId))?.state !== 'failed') {
+        rememberCompletion('failed');
+      }
     }
   }
   return true;
@@ -874,11 +917,15 @@ bridge.onLive?.(event => {
   if (event.type === 'user') window.desktopChanges.attachUser(event);
   if (event.type === 'confirmation' && event.sessionId === sessionId) {
     nativePrompts = Math.max(0, nativePrompts + (event.open === true ? 1 : -1));
+    if (event.open === true) {
+      confirmationTitle = event.title;
+      confirmationSequence++;
+      seenConfirmation = undefined;
+    } else if (!nativePrompts) confirmationTitle = undefined;
     syncScreen();
   }
   if (event.type === 'started' && event.sessionId === sessionId) {
     executionInFlight = true;
-    completedChats.delete(chatKey(folder, sessionId));
     updateButtons();
   }
   if (event.sessionId === sessionId && event.type === 'tool') {
@@ -888,7 +935,7 @@ bridge.onLive?.(event => {
   }
   if (event.type === 'settled' && event.sessionId === sessionId) {
     executionInFlight = false;
-    rememberCompletion(event.aborted || (event.failed ?? nativeStatus === 'error') ? 'failed' : 'done');
+    rememberCompletion(event.aborted || (event.failed ?? nativeStatus === 'error') ? 'failed' : 'done', event.preview);
     if (!viewed) window.desktopDrafts.onSettled?.(event.aborted);
     activeTools.clear();
     finishReview();
@@ -904,6 +951,7 @@ bridge.onLive?.(event => {
   if (event.sessionId !== sessionId) {
     executionInFlight = false;
     nativePrompts = 0;
+    confirmationTitle = undefined;
     reviewingTurn = false;
     window.desktopChanges.reset();
   }
@@ -972,6 +1020,7 @@ async function start(project, savedSession, draftOptions) {
   lookAcrossProjects = false;
   nativeStatus = undefined;
   nativePrompts = 0;
+  confirmationTitle = undefined;
   clearTimeout(terminalFallbackTimer);
   terminalFallbackTimer = undefined;
   terminalRequired = true;
@@ -991,7 +1040,6 @@ async function start(project, savedSession, draftOptions) {
   $('usage-reset').textContent = '—';
   $('settings-model').textContent = '—';
   setUsageStatus('');
-  toolButtons.forEach(button => button.removeAttribute('aria-pressed'));
   status(t("Starting free-pi…"));
   updateButtons();
   fit.fit();
@@ -1025,6 +1073,7 @@ bridge.onExit(code => {
   executionInFlight = false;
   nativeStatus = undefined;
   nativePrompts = 0;
+  confirmationTitle = undefined;
   screen = {};
   window.desktopDrafts.cancelQueue();
   if (reviewingTurn) finishReview();
@@ -1202,7 +1251,7 @@ async function chooseProjectFolder(createFolder, trigger) {
   projectStatus.textContent = '';
   updateProjectDialog();
   try {
-    const selected = await bridge.pickFolder(projectLocation ?? viewed?.folder ?? folder, createFolder);
+    const selected = await bridge.pickFolder(projectLocation, createFolder);
     if (!selected) return;
     projectLocation = selected;
     projectCreatesFolder = createFolder;
@@ -1445,9 +1494,6 @@ $('integrations').onclick = () => {
   showSettings(false);
   openCommandTerminal();
 };
-toolButtons.forEach(button => {
-  button.onclick = () => command(`/tools ${button.dataset.tools}`);
-});
 $('model').onclick = () => {
   showSettings(false);
   if (pickerKind === 'model') dismissPicker();
@@ -1514,7 +1560,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   terminalRequired = false;
   renderTerminal();
   status('');
-  const preferences = await window.desktopSettingsUI.readPreferences();
+  const [preferences, unread] = await Promise.all([
+    window.desktopSettingsUI.readPreferences(),
+    bridge.readUnreadChats().catch(() => []),
+  ]);
+  for (const item of unread) completedChats.set(chatKey(item.folder, item.sessionId), { ...item, restored: true });
+  unreadLoaded = true;
+  updateButtons();
   if (!await window.freepiOnboarding.beforeStartup(preferences)) return;
 
   const [workspace] = await Promise.all([
